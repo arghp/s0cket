@@ -1,3 +1,4 @@
 {
-	"mongoURI": "mongodb://localhost/manon"
+	"mongoURI": "mongodb://localhost/manon",
+	"jwtSecret": "mysecrettoken"
 }
