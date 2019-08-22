@@ -1,4 +1,3 @@
 {
-
-	"mongoURI": "mongodb+srv://arpan123:arpan123@devconnector-lwn6u.mongodb.net/test?retryWrites=true&w=majority"
+	"mongoURI": "mongodb://localhost/manon"
 }
