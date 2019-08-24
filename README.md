@@ -3,15 +3,8 @@ s0cket
 
 s0cket is a social media platform for developers built on the MERN stack.
 
-Progress Checklist
-------------------
+Progress 
+--------
 
-### Backend
-- [x] User API Routes
-- [x] Profile API Routes
-- [ ] Post API Routes
-
-### Frontend
-.
-.
-.
+- [x] Backend API
+- [ ] Frontend
