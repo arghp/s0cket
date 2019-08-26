@@ -182,7 +182,7 @@ router.put('/unlike/:id', auth, async (req, res) => {
 	}
 });
 
-// @route  PUT api/post/comment/:id
+// @route  PUT api/posts/comment/:id
 // @desc   Comment on a post
 // @access Private
 router.put('/comment/:id', 
@@ -270,3 +270,53 @@ router.put('/comment/:id/:comment_id', auth, async (req, res) => {
 	}
 });
 module.exports = router;
+
+// @route  PUT api/posts/:id
+// @desc   Edit a post
+// @access Private
+router.put('/:id', 
+	[
+		auth,
+		[
+		check('text', 'Text is required').not().isEmpty()
+		]
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+
+		try {
+			const post = await Post.findById(req.params.id);
+
+			if (!post) {
+				return res.status(404).json({ msg: 'Post not found'});
+			}
+
+			// check that the post belongs to the user
+			if (post.user.toString() !== req.user.id) {
+				return res.status(401).json({ msg: 'User not authorized'});
+			}
+
+
+			post.text = req.body.text;
+			post.edited = true;
+
+			await post.save();
+
+			res.json(post);
+
+		} catch (err) {
+			console.error(err.message);
+
+			if (err.kind === 'ObjectId') {
+				return res.status(404).json({ msg: 'Post not found'});
+			}
+			res.status(500).send('Server error');
+		}
+
+		
+
+	}
+);
