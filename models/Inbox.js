@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ConversationSchema = new mongoose.Schema({
+const InboxSchema = new mongoose.Schema({
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'users'
@@ -23,4 +23,4 @@ const ConversationSchema = new mongoose.Schema({
 	]
 });
 
-module.exports = Conversation = mongoose.model('conversation', ConversationSchema);
+module.exports = Inbox = mongoose.model('inbox', InboxSchema);
