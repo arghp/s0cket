@@ -8,11 +8,11 @@ const InboxSchema = new mongoose.Schema({
 	conversations: [
 		{
 			recipient: {
-				type: mongoose.mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.Types.ObjectId,
 				ref: 'users'
 			},
 			chat: {
-				type: mongoose.mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.Types.ObjectId,
 				ref: 'chat'
 			},
 			read: {
