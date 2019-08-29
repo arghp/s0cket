@@ -12,7 +12,7 @@ const User = require('../../models/User');
 router.get('/', auth, async (req, res) => {
 	try {
 		// find the chat with the given user and recipient
-		const chat = await Message.find({ $or: [{ sender: { user: req.user.id } }, { recipient: {user: req.user.id } }]})
+		const chat = await Message.find({ $or: [{ 'sender.user': req.user.id }, { 'recipient.user': req.user.id }]})
 			.sort({ created_at: -1 });
 
 		// for the inbox view, we will show the latest single message for each conversation
@@ -61,24 +61,26 @@ router.get('/:id', auth, async (req, res) => {
 		}
 
 		// find the chat with the given user and recipient
-		const chat = await Message.find({ $or: [{ sender: { user: req.user.id }, recipient: { user: req.params.id }}, 
-			{ sender: { user: req.params.id }, recipient: {user: req.user.id } }]})
+		const chat = await Message.find({ $or: [{ 'sender.user': req.user.id, 'recipient.user': req.params.id }, 
+			{ 'sender.user': req.params.id , 'recipient.user': req.user.id }]})
 			.sort({ created_at: -1 })
 			.limit(20);
 
-		// if the sender of the latest message is the other party
-		// mark it as read as the chat has now been accessed
+		if (chat.length !== 0) {
 
-		// (TODO?) this means that if a sender sends consecutive messages
-		// only the latest one will be marked as read for the recipient
-		let latestMessage = chat[0];
+			// if the sender of the latest message is the other party
+			// mark it as read as the chat has now been accessed
 
-		if (latestMessage.sender.user.toString() === req.params.id) {
-			latestMessage.read = true;
+			// (TODO?) this means that if a sender sends consecutive messages
+			// only the latest one will be marked as read for the recipient
+			let latestMessage = chat[0];
+
+			if (latestMessage.sender.user.toString() === req.params.id) {
+				latestMessage.read = true;
+			}
+
+			await latestMessage.save();
 		}
-		
-
-		await latestMessage.save();
 
 		res.json(chat);
 
