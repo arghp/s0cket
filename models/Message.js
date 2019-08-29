@@ -5,6 +5,12 @@ const MessageSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'users'
 	},
+	name: {
+		type: String
+	},
+	avatar: {
+		type: String
+	},
 	recipient: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'users'
