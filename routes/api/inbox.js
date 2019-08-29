@@ -12,7 +12,7 @@ const User = require('../../models/User');
 router.get('/', auth, async (req, res) => {
 	try {
 		// find the chat with the given user and recipient
-		const chat = await Message.find({ $or: [{ sender: req.user.id }, { recipient: req.user.id }]})
+		const chat = await Message.find({ $or: [{ sender: { user: req.user.id } }, { recipient: {user: req.user.id } }]})
 			.sort({ created_at: -1 });
 
 		// for the inbox view, we will show the latest single message for each conversation
@@ -23,9 +23,9 @@ router.get('/', auth, async (req, res) => {
 		// because our query was sorted by created_at
 		// only the most recent message for any given conversation will be stored
 		for (const msg of chat) {
-			let current = msg.sender.toString();
-			if (msg.sender.toString() === req.user.id) {
-				current = msg.recipient.toString();
+			let current = msg.sender.user.toString();
+			if (current === req.user.id) {
+				current = msg.recipient.user.toString();
 			}
 			// store the message object in the map
 			if (!inboxMap.has(current)){
@@ -61,8 +61,8 @@ router.get('/:id', auth, async (req, res) => {
 		}
 
 		// find the chat with the given user and recipient
-		const chat = await Message.find({ $or: [{ sender: req.user.id, recipient: req.params.id }, 
-			{ sender: req.params.id, recipient: req.user.id }]})
+		const chat = await Message.find({ $or: [{ sender: { user: req.user.id }, recipient: { user: req.params.id }}, 
+			{ sender: { user: req.params.id }, recipient: {user: req.user.id } }]})
 			.sort({ created_at: -1 })
 			.limit(20);
 
@@ -73,7 +73,7 @@ router.get('/:id', auth, async (req, res) => {
 		// only the latest one will be marked as read for the recipient
 		let latestMessage = chat[0];
 
-		if (latestMessage.sender == req.params.id) {
+		if (latestMessage.sender.user.toString() === req.params.id) {
 			latestMessage.read = true;
 		}
 		
@@ -115,10 +115,21 @@ router.post('/:id',
 				return res.status(404).json({ msg: 'Recipient not found'});
 			}
 
+			const newSender = {
+				user: sender._id,
+				name: sender.name,
+				avatar: sender.avatar
+			}
+
+			const newRecipient = {
+				user: recipient._id,
+				name: recipient.name,
+				avatar: recipient.avatar
+			}
 			// create and save new chat
 			const newMessage = new Message({
-				sender,
-				recipient,
+				sender: newSender,
+				recipient: newRecipient,
 				text: req.body.text
 			});
 
