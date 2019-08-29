@@ -2,18 +2,28 @@ const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema({
 	sender: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'users'
-	},
-	name: {
-		type: String
-	},
-	avatar: {
-		type: String
+		user: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'users'
+		},
+		name: {
+			type: String
+		},
+		avatar: {
+			type: String
+		},
 	},
 	recipient: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'users'
+		user: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'users'
+		},
+		name: {
+			type: String
+		},
+		avatar: {
+			type: String
+		},
 	},
 	text: {
 		type: String,
