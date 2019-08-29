@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
-const Chat = require('../../models/Chat');
+const Message = require('../../models/Message');
 const User = require('../../models/User');
 
 // @route  GET api/inbox/:id
@@ -18,7 +18,8 @@ router.get('/:id', auth, async (req, res) => {
 		}
 
 		// find the chat with the given user and recipient
-		const chat = await Chat.findOne({ $and: [{ participants: { user: req.user.id }}, { participants: { user: req.params.id }}]});
+		const chat = await Message.find({ $or: [{ sender: req.user.id, recipient: req.params.id }, 
+			{ sender: req.params.id, recipient: req.user.id }]});
 
 		// if the chat exists
 		if (!chat) {
@@ -53,52 +54,22 @@ router.post('/:id',
 		}
 
 		try {
-			const user = await User.findById(req.user.id).select('-password');
+			const sender = await User.findById(req.user.id).select('-password');
 			// make sure that the recipient exists
 			const recipient = await User.findById(req.params.id).select('-password');
 			if (!recipient) {
 				return res.status(404).json({ msg: 'Recipient not found'});
 			}
 
-			// find the chat with the given user and recipient
-			const chat = await Chat.findOne({ $and: [{ participants: { user: req.user.id }}, { participants: { user: req.params.id }}]});
-
-			const newMessage = {
-				user: req.user.id,
-				text: req.body.text,
-				name: user.name,
-				avatar: user.avatar
-			};
-
-			// the sender has seen the message but the recipient has yet not
-			const participants = [
-				{
-					user: req.user.id,
-					read: true
-				},
-				{
-					user: req.params.id,
-					read: false
-				}
-			];
-
-			// if the chat exists
-			if (chat) {
-				chat.messages.unshift(newMessage);
-				chat.participants = participants;
-
-				await chat.save();
-				res.json(chat);
-			}
-
 			// create and save new chat
-			const newChat = new Chat({
-				messages: [newMessage],
-				participants
-			})
+			const newMessage = new Chat({
+				sender,
+				recipient,
+				text: req.body.text
+			});
 
-			await newChat.save()
-			res.json(newChat);
+			await newMessage.save();
+			res.json(newMessage);
 
 		} catch (err) {
 			if (err.kind === 'ObjectId') {
