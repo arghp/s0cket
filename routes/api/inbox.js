@@ -6,6 +6,49 @@ const { check, validationResult } = require('express-validator');
 const Message = require('../../models/Message');
 const User = require('../../models/User');
 
+// @route  GET api/inbox/:
+// @desc   Get inbox
+// @access Private
+router.get('/', auth, async (req, res) => {
+	try {
+		// find the chat with the given user and recipient
+		const chat = await Message.find({ $or: [{ sender: req.user.id }, { recipient: req.user.id }]})
+			.sort({ created_at: -1 });
+
+		// for the inbox view, we will show the latest single message for each conversation
+		// for this purpose, we will use a map
+		let inboxMap = new Map();
+
+		// loop through message objects
+		// because our query was sorted by created_at
+		// only the most recent message for any given conversation will be stored
+		for (const msg of chat) {
+			let current = msg.sender.toString();
+			if (msg.sender.toString() === req.user.id) {
+				current = msg.recipient.toString();
+			}
+			// store the message object in the map
+			if (!inboxMap.has(current)){
+				inboxMap.set(current, msg);
+			}
+		}
+
+		let inboxArray = [];
+		for (var value of inboxMap.values()) {
+			inboxArray.push(value);
+		}
+
+		res.json(inboxArray);
+
+	} catch (err) {
+		if (err.kind === 'ObjectId') {
+			return res.status(404).json({ msg: 'Recipient not found'});
+		}
+		console.error(err.message);
+		res.status(500).send('Server error');
+	}
+});
+
 // @route  GET api/inbox/:id
 // @desc   get messages with user of id
 // @access Private
