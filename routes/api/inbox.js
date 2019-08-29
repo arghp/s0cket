@@ -19,12 +19,23 @@ router.get('/:id', auth, async (req, res) => {
 
 		// find the chat with the given user and recipient
 		const chat = await Message.find({ $or: [{ sender: req.user.id, recipient: req.params.id }, 
-			{ sender: req.params.id, recipient: req.user.id }]});
+			{ sender: req.params.id, recipient: req.user.id }]})
+			.sort({ created_at: -1 })
+			.limit(20);
 
-		// if the chat exists
-		if (!chat) {
-			return res.status(404).json({ msg: 'Messages not found'});
+		// if the sender of the latest message is the other party
+		// mark it as read as the chat has now been accessed
+
+		// (TODO?) this means that if a sender sends consecutive messages
+		// only the latest one will be marked as read for the recipient
+		let latestMessage = chat[0];
+
+		if (latestMessage.sender == req.params.id) {
+			latestMessage.read = true;
 		}
+		
+
+		await latestMessage.save();
 
 		res.json(chat);
 
@@ -62,7 +73,7 @@ router.post('/:id',
 			}
 
 			// create and save new chat
-			const newMessage = new Chat({
+			const newMessage = new Message({
 				sender,
 				recipient,
 				text: req.body.text
