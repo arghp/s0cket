@@ -27,16 +27,15 @@ POST    api/auth                           Authenticate user & get token
 
 profile routes
 --------------
-GET     api/profile/me                     Get current user's profile
-POST    api/profile                        Create or update user profile
-GET     api/profile                        Get all profiles
-GET     api/profile/user/:user_id          Get profile by user ID
-DELETE  api/profile                        Delete profile, user & posts
-PUT     api/profile/experience             Add profile experience
-DELETE  api/profile/experience/:exp_id     Delete profile experience
-PUT     api/profile/education              Add profile education
-DELETE  api/profile/education/:edu_id      Delete profile education
-GET     api/profile/github/:username       Get user repos from Github
+POST    api/profiles                       Create or update user profile
+GET     api/profiles                       Get all profiles
+GET     api/profiles/:user_id              Get profile by user ID
+DELETE  api/profiles                       Delete profile, user & posts
+PUT     api/profiles/experiences           Add profile experience
+DELETE  api/profiles/experiences/:exp_id   Delete profile experience
+PUT     api/profiles/education             Add profile education
+DELETE  api/profiles/education/:edu_id     Delete profile education
+GET     api/profiles/github/:username      Get user repos from Github
 
 post routes
 -----------
@@ -44,15 +43,15 @@ POST    api/posts                          Create a post
 GET     api/posts                          Get all posts
 GET     api/posts/:id                      Get post by id
 DELETE  api/posts/:id                      Delete a post
-PUT     api/posts/like/:id                 Like a post
-PUT     api/posts/unlike/:id               Unlike a post
-PUT     api/posts/comment/:id              Comment on a post
-PUT     api/posts/comment/:id/:comment_id  Remove a comment
+PUT     api/posts/:id/like                 Like a post
+PUT     api/posts/:id/unlike               Unlike a post
+PUT     api/posts/:id/comment              Comment on a post
+PUT     api/posts/:id/comment/:comment_id  Remove a comment
 PUT     api/posts/:id                      Edit a post
 
 inbox routes
 ------------
-GET     api/inbox/                         Get current user's inbox, with latest message for each conversation
-GET     api/inbox/:id                      Get messages with user of id
-POST    api/inbox/:id                      Send a new message to user of id
+GET     api/messages/                      Get current user's messages (?view = inbox for an inbox view, with latest message for each conversation)
+GET     api/messages/user/:id              Get messages with user of id
+POST    api/messages/user/:id              Send a new message to user of id
 ```
