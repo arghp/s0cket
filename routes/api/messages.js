@@ -53,6 +53,66 @@ router.get('/', auth, async (req, res) => {
 	}
 });
 
+// @route  GET api/messages/:id
+// @desc   Get a single message by id
+// @access Public
+router.get('/:id', async (req, res) => {
+	try {
+		const message = await Message.findById(req.params.id);
+		
+		if (!message) {
+			return res.status(400).json({ msg: 'Message not found' });
+		}
+
+		// check authorization
+		if (message.sender.user.toString() === req.user.id ||
+			message.recipient.user.toString() === req.user.id) {
+			return res.json(message);
+		}
+
+		return res.status(401).json({ msg: 'User not authorized'});
+		
+		res.json(profile);
+	} catch (err) {
+		console.error(err.message);
+
+		if (err.kind == 'ObjectId') {
+			return res.status(400).json({ msg: 'Profile not found' });
+		}
+		res.status(500).send('Server Error');
+	}
+});
+
+// @route  DELETE api/messages/:id
+// @desc   Delete a message
+// @access Private
+router.delete('/:id', auth, async (req, res) => {
+	try {
+		const message = await Message.findById(req.params.id);
+
+		if (!message) {
+			return res.status(404).json({ msg: 'Message not found'});
+		}
+
+		// check user
+		if (message.sender.user.toString() !== req.user.id) {
+			return res.status(401).json({ msg: 'User not authorized'});
+		}
+		
+ 		await message.remove();
+
+		res.json({ msg: 'Message removed' });
+	} catch (err) {
+		console.error(err.message);
+
+		if (err.kind === 'ObjectId') {
+			return res.status(404).json({ msg: 'Message not found'});
+		}
+
+		res.status(500).send('Server error');
+	}
+});
+
 // @route  GET api/messages/user/:id
 // @desc   get messages with user of id
 // @access Private
