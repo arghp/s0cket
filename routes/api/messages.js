@@ -6,8 +6,8 @@ const { check, validationResult } = require('express-validator');
 const Message = require('../../models/Message');
 const User = require('../../models/User');
 
-// @route  GET api/inbox/:
-// @desc   Get inbox
+// @route  GET api/messages
+// @desc   Get messages
 // @access Private
 router.get('/', auth, async (req, res) => {
 	try {
@@ -15,30 +15,34 @@ router.get('/', auth, async (req, res) => {
 		const chat = await Message.find({ $or: [{ 'sender.user': req.user.id }, { 'recipient.user': req.user.id }]})
 			.sort({ created_at: -1 });
 
-		// for the inbox view, we will show the latest single message for each conversation
-		// for this purpose, we will use a map
-		let inboxMap = new Map();
+		if (req.query.view === 'inbox') {
+			// for the inbox view, we will show the latest single message for each conversation
+			// for this purpose, we will use a map
+			let inboxMap = new Map();
 
-		// loop through message objects
-		// because our query was sorted by created_at
-		// only the most recent message for any given conversation will be stored
-		for (const msg of chat) {
-			let current = msg.sender.user.toString();
-			if (current === req.user.id) {
-				current = msg.recipient.user.toString();
+			// loop through message objects
+			// because our query was sorted by created_at
+			// only the most recent message for any given conversation will be stored
+			for (const msg of chat) {
+				let current = msg.sender.user.toString();
+				if (current === req.user.id) {
+					current = msg.recipient.user.toString();
+				}
+				// store the message object in the map
+				if (!inboxMap.has(current)){
+					inboxMap.set(current, msg);
+				}
 			}
-			// store the message object in the map
-			if (!inboxMap.has(current)){
-				inboxMap.set(current, msg);
+
+			let inboxArray = [];
+			for (var value of inboxMap.values()) {
+				inboxArray.push(value);
 			}
+
+			return res.json(inboxArray);
 		}
 
-		let inboxArray = [];
-		for (var value of inboxMap.values()) {
-			inboxArray.push(value);
-		}
-
-		res.json(inboxArray);
+		res.json(chat);
 
 	} catch (err) {
 		if (err.kind === 'ObjectId') {
@@ -49,10 +53,10 @@ router.get('/', auth, async (req, res) => {
 	}
 });
 
-// @route  GET api/inbox/:id
+// @route  GET api/messages/user/:id
 // @desc   get messages with user of id
 // @access Private
-router.get('/:id', auth, async (req, res) => {
+router.get('/user/:id', auth, async (req, res) => {
 	try {
 		// make sure that the recipient exists
 		const recipient = await User.findById(req.params.id).select('-password');
@@ -93,10 +97,10 @@ router.get('/:id', auth, async (req, res) => {
 	}
 });
 
-// @route  POST api/inbox/:id
+// @route  POST api/messages/user/:id
 // @desc   Send a new message
 // @access Private
-router.post('/:id', 
+router.post('/user/:id', 
 	[
 		auth,
 		[
