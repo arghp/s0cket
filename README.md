@@ -51,8 +51,8 @@ PUT     api/posts/:id                      Edit a post
 
 inbox routes
 ------------
-GET     api/messages/                      Get current user's messages (?view = inbox for an inbox view, 
-	                                       with latest message for each conversation)
+GET     api/messages                       Get current user's messages (?view = inbox for an inbox view, 
+	                                     with latest message for each conversation)
 GET     api/messages/:id                   Get a single message
 DELETE  api/messages/:id                   Delete a single message	                                       
 GET     api/messages/user/:id              Get messages with user of id
